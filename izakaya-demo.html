@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YUKI — Японский ресторан</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+JP:wght@200;300&family=DM+Mono:wght@300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #0d0c0a;
+    --paper: #f5f0e8;
+    --red: #c0392b;
+    --gold: #b8964a;
+    --mist: #d9d3c7;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(192,57,43,0.4);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s, border-color 0.3s;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 28px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    mix-blend-mode: normal;
+  }
+  .nav-logo {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 200;
+    font-size: 22px;
+    letter-spacing: 0.3em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .nav-jp {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 200;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    opacity: 0.6;
+  }
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--mist);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    text-transform: uppercase;
+  }
+  .nav-links a:hover { opacity: 1; color: var(--paper); }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 60px 80px;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-title {
+    font-size: clamp(64px, 8vw, 110px);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-jp-title {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 200;
+    font-size: 18px;
+    letter-spacing: 0.5em;
+    color: var(--mist);
+    opacity: 0;
+    margin-top: 16px;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+  .hero-sub {
+    margin-top: 40px;
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--mist);
+    max-width: 360px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+  .hero-cta {
+    margin-top: 48px;
+    display: flex; gap: 20px; align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.1s forwards;
+  }
+  .btn-primary {
+    background: var(--red);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 16px 36px;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .btn-primary:hover { background: #a93226; transform: translateY(-2px); }
+  .btn-ghost {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    opacity: 0.7;
+    display: flex; align-items: center; gap: 10px;
+    transition: opacity 0.3s;
+  }
+  .btn-ghost:hover { opacity: 1; }
+  .btn-ghost::after { content: '→'; font-size: 14px; }
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7) contrast(1.1);
+    transform: scale(1.05);
+    animation: slowZoom 12s ease-out forwards;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, var(--ink) 0%, transparent 40%);
+  }
+  .hero-line {
+    position: absolute;
+    right: 60px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 16px;
+    opacity: 0;
+    animation: fadeIn 1s 1.5s forwards;
+  }
+  .hero-line-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--mist);
+    opacity: 0.5;
+    writing-mode: vertical-rl;
+    text-transform: uppercase;
+  }
+  .hero-line-bar {
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, var(--red), transparent);
+  }
+
+  /* ABOUT STRIP */
+  .strip {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 28px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    overflow: hidden;
+  }
+  .strip-item {
+    display: flex; align-items: center; gap: 20px;
+    white-space: nowrap;
+  }
+  .strip-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.2em;
+  }
+  .strip-text {
+    font-size: 15px;
+    letter-spacing: 0.05em;
+  }
+  .strip-divider {
+    width: 1px; height: 30px;
+    background: var(--mist);
+    flex-shrink: 0;
+  }
+
+  /* MENU SECTION */
+  .menu-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: start;
+  }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .section-label::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--red);
+  }
+  .menu-title {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .menu-title em { font-style: italic; color: var(--gold); }
+  .menu-desc {
+    margin-top: 28px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--mist);
+    max-width: 400px;
+  }
+  .menu-list { padding-top: 20px; }
+  .menu-item {
+    border-top: 1px solid rgba(245,240,232,0.1);
+    padding: 28px 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+    transition: border-color 0.3s;
+  }
+  .menu-item:hover { border-color: rgba(192,57,43,0.4); }
+  .menu-item:last-child { border-bottom: 1px solid rgba(245,240,232,0.1); }
+  .menu-item-name { font-size: 22px; font-weight: 300; }
+  .menu-item-jp {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 200;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+  .menu-item-desc {
+    font-size: 14px;
+    color: var(--mist);
+    opacity: 0.6;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .menu-item-price {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--mist);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* ATMOSPHERE */
+  .atmosphere {
+    padding: 0 60px 120px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+  }
+  .atm-card {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+  }
+  .atm-card:first-child { aspect-ratio: 3/5; margin-top: 60px; }
+  .atm-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.75) sepia(0.2);
+    transition: transform 0.6s ease, filter 0.6s ease;
+  }
+  .atm-card:hover .atm-img { transform: scale(1.05); filter: brightness(0.85) sepia(0.1); }
+  .atm-label {
+    position: absolute;
+    bottom: 20px; left: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--paper);
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* BOOKING */
+  .booking {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .booking-title {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 300;
+    line-height: 1.1;
+  }
+  .booking-title em { font-style: italic; color: var(--red); }
+  .booking-sub {
+    margin-top: 20px;
+    font-size: 17px;
+    color: #555;
+    line-height: 1.6;
+  }
+  .booking-info {
+    margin-top: 40px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .booking-info-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: #666;
+    display: flex; gap: 12px;
+  }
+  .booking-info-item strong { color: var(--ink); }
+  .booking-form { display: flex; flex-direction: column; gap: 0; }
+  .form-group {
+    border-bottom: 1px solid var(--mist);
+    padding: 20px 0;
+  }
+  .form-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #999;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--ink);
+    padding: 0;
+  }
+  .form-input::placeholder { color: var(--mist); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .form-submit {
+    margin-top: 40px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    padding: 18px 40px;
+    cursor: none;
+    align-self: flex-start;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .form-submit:hover { background: var(--red); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    padding: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 60px;
+    border-top: 1px solid rgba(245,240,232,0.1);
+  }
+  .footer-brand .footer-logo {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 200;
+    font-size: 24px;
+    letter-spacing: 0.3em;
+    color: var(--paper);
+  }
+  .footer-brand p {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--mist);
+    opacity: 0.5;
+    line-height: 1.6;
+  }
+  .footer-col h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+  .footer-col p, .footer-col a {
+    font-size: 15px;
+    color: var(--mist);
+    opacity: 0.6;
+    line-height: 1.8;
+    text-decoration: none;
+    display: block;
+  }
+  .footer-col a:hover { opacity: 1; }
+  .footer-bottom {
+    padding: 24px 60px;
+    display: flex; justify-content: space-between;
+    border-top: 1px solid rgba(245,240,232,0.06);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--mist);
+    opacity: 0.3;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes slowZoom {
+    from { transform: scale(1.05); }
+    to   { transform: scale(1); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.3s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+
+  /* FLOATING PETALS */
+  .petals { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .petal {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: rgba(192,57,43,0.15);
+    border-radius: 50% 0;
+    animation: fall linear infinite;
+    top: -10px;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 20px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 0 24px 60px; justify-content: flex-end; min-height: 100vh; }
+    .menu-section { grid-template-columns: 1fr; gap: 60px; padding: 80px 24px; }
+    .atmosphere { grid-template-columns: 1fr; padding: 0 24px 80px; gap: 4px; }
+    .atm-card:first-child { margin-top: 0; }
+    .booking { grid-template-columns: 1fr; padding: 80px 24px; }
+    footer { grid-template-columns: 1fr; padding: 60px 24px; }
+    .footer-bottom { padding: 24px; flex-direction: column; gap: 8px; }
+    .strip { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Falling petals -->
+<div class="petals" id="petals"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">雪 YUKI</a>
+  <ul class="nav-links">
+    <li><a href="#menu">Меню</a></li>
+    <li><a href="#atmosphere">Атмосфера</a></li>
+    <li><a href="#booking">Бронь</a></li>
+  </ul>
+  <span class="nav-jp">Японский ресторан</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-tag">Токийская кухня · Москва</p>
+    <h1 class="hero-title">Вкус<br><em>тишины</em></h1>
+    <p class="hero-jp-title">雪 — снег</p>
+    <p class="hero-sub">Аутентичная японская кухня в пространстве, где время замедляется. Каждое блюдо — медитация.</p>
+    <div class="hero-cta">
+      <a href="#booking" class="btn-primary">Забронировать стол</a>
+      <a href="#menu" class="btn-ghost">Смотреть меню</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img class="hero-img"
+      src="https://images.unsplash.com/photo-1553621042-f6e147245754?w=900&q=85"
+      alt="Japanese cuisine">
+    <div class="hero-overlay"></div>
+    <div class="hero-line">
+      <span class="hero-line-text">Открыто ежедневно</span>
+      <div class="hero-line-bar"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-item">
+    <span class="strip-num">01</span>
+    <span class="strip-text">Омакасе от шефа</span>
+  </div>
+  <div class="strip-divider"></div>
+  <div class="strip-item">
+    <span class="strip-num">02</span>
+    <span class="strip-text">Рыба доставляется еженедельно из Токио</span>
+  </div>
+  <div class="strip-divider"></div>
+  <div class="strip-item">
+    <span class="strip-num">03</span>
+    <span class="strip-text">Частные залы для компаний</span>
+  </div>
+  <div class="strip-divider"></div>
+  <div class="strip-item">
+    <span class="strip-num">04</span>
+    <span class="strip-text">Вт–Вс · 18:00–00:00</span>
+  </div>
+</div>
+
+<!-- MENU -->
+<section class="menu-section" id="menu">
+  <div>
+    <p class="section-label reveal">Наше меню</p>
+    <h2 class="menu-title reveal reveal-delay-1">Избранные<br><em>блюда</em></h2>
+    <p class="menu-desc reveal reveal-delay-2">Сезонное меню, основанное на японской философии шун — использование ингредиентов в момент их наивысшей зрелости.</p>
+  </div>
+  <div class="menu-list reveal">
+    <div class="menu-item">
+      <div>
+        <div class="menu-item-name">Омакасе сет</div>
+        <div class="menu-item-jp">おまかせ</div>
+        <div class="menu-item-desc">8 перемен от шеф-повара · сезонные ингредиенты</div>
+      </div>
+      <div class="menu-item-price">6 800 ₽</div>
+    </div>
+    <div class="menu-item">
+      <div>
+        <div class="menu-item-name">Wagyu Tataki</div>
+        <div class="menu-item-jp">和牛たたき</div>
+        <div class="menu-item-desc">Говядина А5, понзу трюфель, микрозелень</div>
+      </div>
+      <div class="menu-item-price">2 400 ₽</div>
+    </div>
+    <div class="menu-item">
+      <div>
+        <div class="menu-item-name">Uni Ikura Don</div>
+        <div class="menu-item-jp">うにいくら丼</div>
+        <div class="menu-item-desc">Свежий морской ёж, икра лосося, рис сумэси</div>
+      </div>
+      <div class="menu-item-price">3 200 ₽</div>
+    </div>
+    <div class="menu-item">
+      <div>
+        <div class="menu-item-name">Miso Ramen</div>
+        <div class="menu-item-jp">味噌ラーメン</div>
+        <div class="menu-item-desc">Бульон 24 часа, чашу, маринованное яйцо</div>
+      </div>
+      <div class="menu-item-price">1 200 ₽</div>
+    </div>
+    <div class="menu-item">
+      <div>
+        <div class="menu-item-name">Matcha Kakigori</div>
+        <div class="menu-item-jp">抹茶かき氷</div>
+        <div class="menu-item-desc">Бритый лёд, сироп маття, ширатама моти</div>
+      </div>
+      <div class="menu-item-price">680 ₽</div>
+    </div>
+  </div>
+</section>
+
+<!-- ATMOSPHERE -->
+<div class="atmosphere" id="atmosphere">
+  <div class="atm-card reveal">
+    <img class="atm-img" src="https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?w=600&q=80" alt="interior">
+    <span class="atm-label">Интерьер</span>
+  </div>
+  <div class="atm-card reveal reveal-delay-1">
+    <img class="atm-img" src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&q=80" alt="sushi">
+    <span class="atm-label">Кухня</span>
+  </div>
+  <div class="atm-card reveal reveal-delay-2">
+    <img class="atm-img" src="https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=600&q=80" alt="sake">
+    <span class="atm-label">Сакэ бар</span>
+  </div>
+</div>
+
+<!-- BOOKING -->
+<section class="booking" id="booking">
+  <div>
+    <p class="section-label reveal" style="color: var(--red);">Резервация</p>
+    <h2 class="booking-title reveal reveal-delay-1">Забронируйте<br>свой <em>вечер</em></h2>
+    <p class="booking-sub reveal reveal-delay-2">Мы готовим пространство для вас заранее. Каждый гость — особенный.</p>
+    <div class="booking-info reveal reveal-delay-3">
+      <div class="booking-info-item"><strong>Адрес</strong> ул. Пречистенка, 12, Москва</div>
+      <div class="booking-info-item"><strong>Телефон</strong> +7 (495) 000-00-00</div>
+      <div class="booking-info-item"><strong>Часы работы</strong> Вт–Вс · 18:00–00:00</div>
+    </div>
+  </div>
+  <form class="booking-form reveal" onsubmit="handleSubmit(event)">
+    <div class="form-group">
+      <label class="form-label">Имя</label>
+      <input class="form-input" type="text" placeholder="Ваше имя">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Телефон</label>
+      <input class="form-input" type="tel" placeholder="+7 (___) ___-__-__">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Дата</label>
+        <input class="form-input" type="date">
+      </div>
+      <div class="form-group" style="padding-left: 20px;">
+        <label class="form-label">Гостей</label>
+        <input class="form-input" type="number" placeholder="2" min="1" max="20">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Пожелания</label>
+      <input class="form-input" type="text" placeholder="Аллергии, особые пожелания...">
+    </div>
+    <button type="submit" class="form-submit">Подтвердить бронь</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo">雪 YUKI</div>
+    <p>Японский ресторан в сердце Москвы. Место, где традиция встречается с современностью.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Навигация</h4>
+    <a href="#menu">Меню</a>
+    <a href="#atmosphere">Атмосфера</a>
+    <a href="#booking">Бронирование</a>
+  </div>
+  <div class="footer-col">
+    <h4>Контакты</h4>
+    <p>ул. Пречистенка, 12</p>
+    <p>+7 (495) 000-00-00</p>
+    <a href="#">Instagram</a>
+    <a href="#">Telegram</a>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span>© 2025 YUKI · Все права защищены</span>
+  <span>Японская кухня · Москва</span>
+</div>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+  function animateCursor() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) *.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '60px'; ring.style.height = '60px'; ring.style.borderColor = 'rgba(192,57,43,0.7)'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; ring.style.borderColor = 'rgba(192,57,43,0.4)'; });
+  });
+
+  // Petals
+  const petalsEl = document.getElementById('petals');
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (4 + Math.random() * 6) + 'px';
+    petalsEl.appendChild(p);
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.15 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Form
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.form-submit');
+    btn.textContent = '✓ Заявка отправлена';
+    btn.style.background = '#27ae60';
+  }
+</script>
+</body>
+</html>
